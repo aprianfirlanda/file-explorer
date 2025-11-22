@@ -1,27 +1,36 @@
 <template>
   <li>
     <div
-        class="flex items-center cursor-pointer select-none px-1 py-0.5 rounded"
-        :class="isSelected ? 'bg-blue-100 text-blue-800' : 'hover:bg-gray-100'"
+        class="folder-node"
+        :class="{ 'folder-node--selected': isSelected }"
         @click.stop="handleSelect"
     >
-      <!-- Toggle icon -->
-      <span class="w-4 flex justify-center mr-1" @click.stop="handleToggle">
+      <!-- Toggle arrow -->
+      <span
+          class="folder-node__toggle"
+          @click.stop="handleToggle"
+      >
         <span v-if="hasChildren">
           {{ isExpanded ? "▾" : "▸" }}
         </span>
       </span>
 
-      <!-- Folder icon (simple) -->
-      <span class="mr-1">📁</span>
+      <!-- Icon -->
+      <span class="folder-node__icon">📁</span>
 
       <!-- Name with indentation -->
-      <span :style="{ paddingLeft: `${level * 8}px` }">
+      <span
+          class="folder-node__label"
+          :style="{ paddingLeft: `${level * 12}px` }"
+      >
         {{ node.name }}
       </span>
     </div>
 
-    <ul v-if="hasChildren && isExpanded" class="ml-4">
+    <ul
+        v-if="hasChildren && isExpanded"
+        class="folder-node__children"
+    >
       <FolderNode
           v-for="child in node.children"
           :key="child.id"
@@ -65,3 +74,46 @@ function handleSelect() {
   emit("select", props.node.id);
 }
 </script>
+
+<style scoped>
+.folder-node {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.folder-node:hover {
+  background-color: #e5e7eb;
+}
+
+.folder-node--selected {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+
+.folder-node__toggle {
+  width: 16px;
+  text-align: center;
+  font-size: 10px;
+  color: #6b7280;
+}
+
+.folder-node__icon {
+  width: 18px;
+}
+
+.folder-node__label {
+  white-space: nowrap;
+}
+
+.folder-node__children {
+  list-style: none;
+  margin: 0;
+  padding-left: 16px;
+}
+</style>
