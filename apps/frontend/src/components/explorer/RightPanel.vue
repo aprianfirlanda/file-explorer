@@ -7,21 +7,21 @@
         @search="handleSearch"
     />
 
-    <!-- When search is active, show search results instead of normal content -->
     <template v-if="searchActive">
-      <SearchResults
-          :active="searchActive"
-          :loading="searchLoading"
-          :lastQuery="lastQuery"
-          :results="searchResults"
-          @open-folder="handleOpenFolder"
-      />
+      <h3 class="right-panel__section-title">Search Results</h3>
+
+      <div v-if="searchLoading">Searching…</div>
+
+      <div v-else>
+        <div v-if="content.folders.length === 0 && content.files.length === 0">
+          No results for "<strong>{{ lastQuery }}</strong>"
+        </div>
+      </div>
     </template>
 
-    <!-- Normal right panel content (when not searching) -->
     <template v-else>
       <div v-if="!selectedId" class="right-panel__state">
-        Select a folder from the left panel.
+        Select a folder from the left panel or Type something Search Bar
       </div>
 
       <template v-else>
@@ -40,62 +40,65 @@
           >
             This folder is empty.
           </div>
-
-          <section v-if="folders.length > 0" class="right-panel__section">
-            <h3 class="right-panel__section-title">Folders</h3>
-            <div class="right-panel__grid">
-              <div
-                  v-for="f in folders"
-                  :key="f.id"
-                  class="right-panel__item"
-              >
-                <Folder class="right-panel__item-icon" :size="18" />
-                <span class="right-panel__item-label">{{ f.name }}</span>
-              </div>
-            </div>
-          </section>
-
-          <section v-if="files.length > 0" class="right-panel__section">
-            <h3 class="right-panel__section-title">Files</h3>
-            <ul class="right-panel__files-list">
-              <li
-                  v-for="file in files"
-                  :key="file.id"
-                  class="right-panel__file"
-              >
-                <div class="right-panel__file-main">
-                  <component
-                      :is="getFileIconByMime(file.mimeType)"
-                      :size="18"
-                      class="right-panel__file-icon"
-                  />
-                  <span class="right-panel__file-name">{{ file.name }}</span>
-                </div>
-                <span class="right-panel__file-size">
-                  {{ formatFileSize(file.sizeBytes) }}
-                </span>
-              </li>
-            </ul>
-          </section>
         </div>
       </template>
     </template>
+
+    <!-- Normal right panel content (when not searching) -->
+
+      <section v-if="content.folders.length > 0" class="right-panel__section">
+        <h3 class="right-panel__section-title">Folders</h3>
+        <div class="right-panel__grid">
+          <div
+              v-for="f in content.folders"
+              :key="f.id"
+              class="right-panel__item"
+          >
+            <Folder class="right-panel__item-icon" :size="18" />
+            <span class="right-panel__item-label">{{ f.name }}</span>
+          </div>
+        </div>
+      </section>
+
+      <section v-if="content.files.length > 0" class="right-panel__section">
+        <h3 class="right-panel__section-title">Files</h3>
+        <ul class="right-panel__files-list">
+          <li
+              v-for="file in content.files"
+              :key="file.id"
+              class="right-panel__file"
+          >
+            <div class="right-panel__file-main">
+              <component
+                  :is="getFileIconByMime(file.mimeType)"
+                  :size="18"
+                  class="right-panel__file-icon"
+              />
+              <span class="right-panel__file-name">{{ file.name }}</span>
+            </div>
+            <span class="right-panel__file-size">
+              {{ formatFileSize(file.sizeBytes) }}
+            </span>
+          </li>
+        </ul>
+      </section>
+
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import { Folder } from "lucide-vue-next";
+import {ref, watch} from "vue";
+import {Folder} from "lucide-vue-next";
 
-import type { FolderEntity } from "../../types/folder";
-import type { FileEntity } from "../../types/file.types";
-import { getFileIconByMime } from "../../utils/mimeIcon";
-import { formatFileSize } from "../../utils/formatFileSize";
+import type {FolderContent, FolderEntity} from "../../types/folder";
+import type {FileEntity} from "../../types/file.types";
+import {getFileIconByMime} from "../../utils/mimeIcon";
+import {formatFileSize} from "../../utils/formatFileSize";
 
 import SearchBar from "./SearchBar.vue";
-import SearchResults from "./SearchResult.vue";
+import {fetchSearch} from "../../api/searchApi.ts";
 
-defineProps<{
+const props = defineProps<{
   selectedId: string | null;
   folders: FolderEntity[];
   files: FileEntity[];
@@ -103,29 +106,32 @@ defineProps<{
   error: string | null;
 }>();
 
-const emit = defineEmits<{
-  (e: "select-folder", folderId: string): void;
-}>();
-
 // --- Search state ---
 const searchQuery = ref("");
 const lastQuery = ref("");
 const searchActive = ref(false);
 const searchLoading = ref(false);
-const searchResults = ref<{
-  folders: FolderEntity[];
-  files: FileEntity[];
-}>({
-  folders: [],
-  files: [],
+const content = ref<FolderContent>({
+  folders: props.folders,
+  files: props.files,
 });
+
+watch(
+    () => [props.folders, props.files],
+    () => {
+      content.value = {
+        folders: props.folders,
+        files: props.files,
+      };
+    }
+);
 
 async function handleSearch() {
   const q = searchQuery.value.trim();
 
   if (!q) {
     searchActive.value = false;
-    searchResults.value = { folders: [], files: [] };
+    content.value = { folders: props.folders, files: props.files };
     return;
   }
 
@@ -134,31 +140,16 @@ async function handleSearch() {
   lastQuery.value = q;
 
   try {
-    // if you want to limit search to current folder:
-    // const parentParam = props.selectedId ? `&parentId=${props.selectedId}` : "";
-    // const res = await fetch(`/api/v1/search?q=${encodeURIComponent(q)}&type=all${parentParam}`);
-
-    const res = await fetch(
-        `/api/v1/search?q=${encodeURIComponent(q)}&type=all`
-    );
-    const json = await res.json();
-    searchResults.value =
-        json.data ?? ({ folders: [], files: [] } as {
-          folders: FolderEntity[];
-          files: FileEntity[];
-        });
+    const res = await fetchSearch(q);
+    content.value = res.data;
   } catch (e) {
     console.error("Search error", e);
-    searchResults.value = { folders: [], files: [] };
+    content.value = { folders: props.folders, files: props.files };
   } finally {
     searchLoading.value = false;
   }
 }
 
-function handleOpenFolder(folder: FolderEntity) {
-  // Emit up so parent (ExplorerLayout) can change selectedId
-  emit("select-folder", folder.id);
-}
 </script>
 
 <style scoped>
