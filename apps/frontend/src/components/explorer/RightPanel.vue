@@ -49,7 +49,7 @@
                 <span class="right-panel__file-name">{{ file.name }}</span>
               </div>
               <span class="right-panel__file-size">
-                {{ file.sizeBytes ?? 0 }} bytes
+                {{ formatFileSize(file.sizeBytes) }}
               </span>
             </li>
           </ul>
@@ -64,6 +64,7 @@ import {Folder} from "lucide-vue-next";
 import type {FolderEntity} from "../../types/folder";
 import type {FileEntity} from "../../types/file.types.ts";
 import {getFileIconByMime} from "../../utils/mimeIcon.ts";
+import {formatFileSize} from "../../utils/formatFileSize.ts";
 
 defineProps<{
   selectedId: string | null;
