@@ -1,8 +1,8 @@
 import { folderService } from "./folder.service";
 import { Elysia } from "elysia";
 
-export const folderRouter = new Elysia({ prefix: "/folders" })
-  // Full folder tree (for left panel)
+export const folderRouterV1 = new Elysia({ prefix: "/folders" })
+  // Full folder tree (for the left panel)
   .get("/tree", async () => {
     const data = await folderService.getFolderTree();
     return { data };

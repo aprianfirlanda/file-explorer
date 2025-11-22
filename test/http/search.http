@@ -1,0 +1,2 @@
+### GET search folder or file
+GET http://localhost:3000/api/v1/search?q=po

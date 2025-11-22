@@ -19,6 +19,7 @@ model Folder {
 
   @@index([parentId], map: "idx_folders_parent_id")
   @@map("folders")
+  @@index([name])
 }
 
 model File {
@@ -32,5 +33,6 @@ model File {
   updatedAt DateTime @updatedAt
 
   @@index([folderId], name: "idx_files_folder_id")
-  @@map("files")     // 👈 forces lowercase table name
+  @@map("files")     //
+  @@index([name])
 }

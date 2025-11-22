@@ -1,5 +1,5 @@
 import {ref, watch} from "vue";
-import {fetchFolderContents} from "../api/folderApi";
+import {fetchFolderContents} from "../api/folderApiV1.ts";
 import type {FolderEntity} from "../types/folder";
 import type {FileEntity} from "../types/file.types.ts";
 

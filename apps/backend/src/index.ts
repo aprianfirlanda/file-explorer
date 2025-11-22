@@ -1,8 +1,10 @@
 import {Elysia} from 'elysia';
-import {folderRouter} from "./modules/folder/folder.router.ts";
+import {folderRouterV1} from "./modules/folder/folderRouterV1.ts";
+import {searchRouterV1} from "./modules/search/searchRouterV1.ts";
 
 const apiV1Routes = new Elysia({prefix: "/api/v1"})
-  .use(folderRouter);
+  .use(folderRouterV1)
+  .use(searchRouterV1);
 
 const app = new Elysia()
   .use(apiV1Routes)

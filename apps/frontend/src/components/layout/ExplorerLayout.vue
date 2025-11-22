@@ -29,6 +29,7 @@
             :files="files"
             :is-loading="contentsLoading"
             :error="contentsError"
+            @select-folder="selectedId = $event"
         />
       </div>
     </section>
