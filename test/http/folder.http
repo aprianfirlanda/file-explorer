@@ -2,4 +2,4 @@
 GET http://localhost:3000/api/v1/folders/tree
 
 ### GET Folder Contents
-GET http://localhost:3000/api/v1/folders/269c11ac-5add-44ae-a6bd-36837cf0d10a/contents
+GET http://localhost:3000/api/v1/folders/112738e8-795e-4597-b83c-a00a3650101c/contents

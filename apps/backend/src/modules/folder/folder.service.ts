@@ -17,7 +17,10 @@ class FolderService {
       })
     ]);
 
-    return {folders, files};
+    return {
+      folders,
+      files: files.map(file => ({...file, sizeBytes: file.sizeBytes ? Number(file.sizeBytes) : null})),
+    };
   }
 
   /**
