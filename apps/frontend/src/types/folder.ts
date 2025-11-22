@@ -1,3 +1,5 @@
+import type {FileEntity} from "./file.types.ts";
+
 export interface FolderNode {
   id: string;
   name: string;
@@ -11,4 +13,9 @@ export type FolderEntity = {
   parentId: string | null
   createdAt: Date | null
   updatedAt: Date | null
+}
+
+export interface FolderContent {
+  folders: FolderEntity[];
+  files: FileEntity[];
 }

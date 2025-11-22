@@ -26,6 +26,7 @@
         <RightPanel
             :selected-id="selectedId"
             :folders="folders"
+            :files="files"
             :is-loading="contentsLoading"
             :error="contentsError"
         />
@@ -57,6 +58,7 @@ loadTree();
 const getSelectedId = () => selectedId.value;
 const {
   folders,
+  files,
   isLoading: contentsLoading,
   error: contentsError,
 } = useRightPanel(getSelectedId);

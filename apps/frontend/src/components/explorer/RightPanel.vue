@@ -14,7 +14,7 @@
       </div>
 
       <div v-else>
-        <div v-if="folders.length === 0" class="right-panel__state">
+        <div v-if="folders.length === 0 && files.length === 0" class="right-panel__state">
           This folder is empty.
         </div>
 
@@ -26,10 +26,33 @@
                 :key="f.id"
                 class="right-panel__item"
             >
-              <span class="right-panel__item-icon">📁</span>
+              <Folder class="right-panel__item-icon" :size="18" />
               <span class="right-panel__item-label">{{ f.name }}</span>
             </div>
           </div>
+        </section>
+
+        <section v-if="files.length > 0" class="right-panel__section">
+          <h3 class="right-panel__section-title">Files</h3>
+          <ul class="right-panel__files-list">
+            <li
+                v-for="file in files"
+                :key="file.id"
+                class="right-panel__file"
+            >
+              <div class="right-panel__file-main">
+                <component
+                    :is="getFileIconByMime(file.mimeType)"
+                    :size="18"
+                    class="right-panel__file-icon"
+                />
+                <span class="right-panel__file-name">{{ file.name }}</span>
+              </div>
+              <span class="right-panel__file-size">
+                {{ formatFileSize(file.sizeBytes) }}
+              </span>
+            </li>
+          </ul>
         </section>
       </div>
     </template>
@@ -37,11 +60,16 @@
 </template>
 
 <script setup lang="ts">
+import {Folder} from "lucide-vue-next";
 import type {FolderEntity} from "../../types/folder";
+import type {FileEntity} from "../../types/file.types.ts";
+import {getFileIconByMime} from "../../utils/mimeIcon.ts";
+import {formatFileSize} from "../../utils/formatFileSize.ts";
 
 defineProps<{
   selectedId: string | null;
   folders: FolderEntity[];
+  files: FileEntity[];
   isLoading: boolean;
   error: string | null;
 }>();
@@ -100,6 +128,7 @@ defineProps<{
   white-space: nowrap;
 }
 
+
 .right-panel__files-list {
   list-style: none;
   margin: 0;
@@ -109,8 +138,27 @@ defineProps<{
 .right-panel__file {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   padding: 4px 0;
   border-bottom: 1px solid #f3f4f6;
+}
+
+.right-panel__file-main {
+  display: flex;
+  align-items: center;
+}
+
+.right-panel__file-icon {
+  margin-right: 6px;
+  /* icon color */
+  color: #4b5563;
+}
+
+.right-panel__file-name {
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .right-panel__file-size {

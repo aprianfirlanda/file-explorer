@@ -1,12 +1,26 @@
 import {prisma} from "../../lib/prisma.ts";
-import type {FolderEntity, FolderNode} from "./folder.types.ts";
+import type {FolderContent, FolderNode} from "./folder.types.ts";
 
 class FolderService {
-  async getChildren(parentId: string | null): Promise<FolderEntity[]> {
-    return prisma.folder.findMany({
-      where: { parentId },
-      orderBy: { name: "asc" },
-    });
+  /**
+   * Get the contents of a folder: its direct subfolders and files.
+   * Queries folders by parentId and files by folderId.
+   */
+  async getContents(parentId: string): Promise<FolderContent> {
+    const [folders, files] = await Promise.all([
+      prisma.folder.findMany({
+        where: { parentId },
+        orderBy: { name: "asc" },
+      }),
+      prisma.file.findMany({
+        where:{ folderId: parentId}
+      })
+    ]);
+
+    return {
+      folders,
+      files: files.map(file => ({...file, sizeBytes: file.sizeBytes ? Number(file.sizeBytes) : null})),
+    };
   }
 
   /**
