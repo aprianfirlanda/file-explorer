@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -14,13 +8,13 @@ datasource db {
 }
 
 model Folder {
-  id        String    @id @default(uuid()) @db.Uuid
+  id        String   @id @default(uuid()) @db.Uuid
   name      String
-  parentId  String?   @db.Uuid
-  parent    Folder?   @relation("FolderChildren", fields: [parentId], references: [id], onDelete: Cascade)
-  children  Folder[]  @relation("FolderChildren")
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  parentId  String?  @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  parent    Folder?  @relation("FolderChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  children  Folder[] @relation("FolderChildren")
 
-  @@index([parentId], name: "idx_folders_parent_id")
+  @@index([parentId], map: "idx_folders_parent_id")
 }
