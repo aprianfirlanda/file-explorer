@@ -17,4 +17,5 @@ model Folder {
   children  Folder[] @relation("FolderChildren")
 
   @@index([parentId], map: "idx_folders_parent_id")
+  @@map("folders")
 }
