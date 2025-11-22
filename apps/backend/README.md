@@ -1,15 +1,40 @@
 # backend
 
-To install dependencies:
+API Design
 
-```bash
-bun install
-```
+Base path: /api/v1
 
-To run:
+-  GET /api/v1/folders/tree
 
-```bash
-bun run index.ts
-```
+   Returns the full folder tree for the left panel on load.
+   
+   Response example:
+   ```json
+   [
+     {
+       "id": "root-id",
+       "name": "Root",
+       "children": [
+         {
+           "id": "sub-1",
+           "name": "Documents",
+           "children": [...]
+         }
+       ]
+     }
+   ]
+   ```
 
-This project was created using `bun init` in bun v1.3.3. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+- GET /api/v1/folders/:id/children
+
+  Returns direct subfolders of the given folder.
+
+  Response example:
+   ```json
+   [
+     {
+       "id": "id",
+       "name": "Child Folder"
+     }
+   ]
+   ```
