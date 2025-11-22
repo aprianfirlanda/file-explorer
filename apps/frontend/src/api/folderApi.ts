@@ -1,10 +1,11 @@
 import {API_BASE_URL, request} from "./httpClient.ts";
 import type {FolderEntity, FolderNode} from "../types/folder.ts";
+import type {ApiResponse} from "../types/api.ts";
 
 export function fetchFolderTree() {
-  return request<FolderNode[]>(`${API_BASE_URL}/folders/tree`);
+  return request<ApiResponse<FolderNode[]>>(`${API_BASE_URL}/folders/tree`);
 }
 
 export function fetchFolderChildren(folderId: string) {
-  return request<FolderEntity[]>(`${API_BASE_URL}/folders/${folderId}/children`);
+  return request<ApiResponse<FolderEntity[]>>(`${API_BASE_URL}/folders/${folderId}/children`);
 }
