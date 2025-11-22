@@ -1,0 +1,5 @@
+### GET Folder Tree
+GET http://localhost:3000/folders/tree
+
+### GET Folder Tree
+GET http://localhost:3000/folders/269c11ac-5add-44ae-a6bd-36837cf0d10a/children
