@@ -1,5 +1,5 @@
 <template>
-  <li>
+  <li style="list-style: none">
     <div
         class="folder-node"
         :class="{ 'folder-node--selected': isSelected }"
@@ -11,12 +11,16 @@
           @click.stop="handleToggle"
       >
         <span v-if="hasChildren">
-          {{ isExpanded ? "▾" : "▸" }}
+          <ChevronRight v-if="!isExpanded" class="w-4 h-4"/>
+          <ChevronDown v-else class="w-4 h-4"/>
         </span>
       </span>
 
       <!-- Icon -->
-      <span class="folder-node__icon">📁</span>
+      <span class="folder-node__icon">
+        <Folder v-if="!isExpanded" class="w-4 h-4"/>
+        <FolderOpen v-else class="w-4 h-4"/>
+      </span>
 
       <!-- Name with indentation -->
       <span
@@ -47,6 +51,7 @@
 
 <script setup lang="ts">
 import {computed} from "vue";
+import {Folder, FolderOpen, ChevronRight, ChevronDown} from "lucide-vue-next";
 import type {FolderNode as FolderNodeType} from "../../types/folder";
 
 const props = defineProps<{
@@ -103,10 +108,6 @@ function handleSelect() {
   color: #6b7280;
 }
 
-.folder-node__icon {
-  width: 18px;
-}
-
 .folder-node__label {
   white-space: nowrap;
 }
@@ -116,4 +117,13 @@ function handleSelect() {
   margin: 0;
   padding-left: 16px;
 }
+
+.w-4{
+  width: 1rem;
+}
+
+.h-4{
+  height: 1rem;
+}
+
 </style>
