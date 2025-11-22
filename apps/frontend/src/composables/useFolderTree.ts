@@ -1,6 +1,6 @@
 import { ref } from "vue";
 import type { FolderNode } from "../types/folder";
-import { fetchFolderTree } from "../api/folderApi";
+import { fetchFolderTree } from "../api/folderApiV1.ts";
 
 export function useFolderTree() {
   const tree = ref<FolderNode[]>([]);

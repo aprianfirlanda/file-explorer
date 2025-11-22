@@ -1,7 +1,7 @@
 import {Elysia, t} from 'elysia';
 import {searchService} from './search.service';
 
-export const searchRouter = new Elysia({prefix: '/search'})
+export const searchRouterV1 = new Elysia({prefix: '/search'})
     .get(
       '/',
       async ({query}) => {

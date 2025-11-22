@@ -96,7 +96,7 @@ import {getFileIconByMime} from "../../utils/mimeIcon";
 import {formatFileSize} from "../../utils/formatFileSize";
 
 import SearchBar from "./SearchBar.vue";
-import {fetchSearch} from "../../api/searchApi.ts";
+import {fetchSearch} from "../../api/searchApiV1.ts";
 
 const props = defineProps<{
   selectedId: string | null;
