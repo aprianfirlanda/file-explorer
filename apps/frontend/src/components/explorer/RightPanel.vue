@@ -53,6 +53,7 @@
               v-for="f in content.folders"
               :key="f.id"
               class="right-panel__item"
+              @click="handleFolderClick(f.id)"
           >
             <Folder class="right-panel__item-icon" :size="18" />
             <span class="right-panel__item-label">{{ f.name }}</span>
@@ -106,6 +107,10 @@ const props = defineProps<{
   error: string | null;
 }>();
 
+const emit = defineEmits<{
+  (e: "select-folder", id: string): void;
+}>();
+
 // --- Search state ---
 const searchQuery = ref("");
 const lastQuery = ref("");
@@ -148,6 +153,12 @@ async function handleSearch() {
   } finally {
     searchLoading.value = false;
   }
+}
+
+function handleFolderClick(id: string) {
+  searchActive.value = false;
+  searchQuery.value = "";
+  emit("select-folder", id);
 }
 
 </script>
