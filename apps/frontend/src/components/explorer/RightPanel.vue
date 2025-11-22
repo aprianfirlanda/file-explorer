@@ -14,7 +14,7 @@
       </div>
 
       <div v-else>
-        <div v-if="folders.length === 0" class="right-panel__state">
+        <div v-if="folders.length === 0 && files.length === 0" class="right-panel__state">
           This folder is empty.
         </div>
 
@@ -31,6 +31,22 @@
             </div>
           </div>
         </section>
+
+        <section v-if="files.length > 0" class="right-panel__section">
+          <h3 class="right-panel__section-title">Files</h3>
+          <ul class="right-panel__files-list">
+            <li
+                v-for="file in files"
+                :key="file.id"
+                class="right-panel__file"
+            >
+              <span>📄 {{ file.name }}</span>
+              <span class="right-panel__file-size">
+                {{ file.sizeBytes ?? 0 }} bytes
+              </span>
+            </li>
+          </ul>
+        </section>
       </div>
     </template>
   </div>
@@ -38,10 +54,12 @@
 
 <script setup lang="ts">
 import type {FolderEntity} from "../../types/folder";
+import type {FileEntity} from "../../types/file.types.ts";
 
 defineProps<{
   selectedId: string | null;
   folders: FolderEntity[];
+  files: FileEntity[];
   isLoading: boolean;
   error: string | null;
 }>();

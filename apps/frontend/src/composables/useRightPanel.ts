@@ -1,9 +1,11 @@
 import {ref, watch} from "vue";
-import {fetchFolderChildren} from "../api/folderApi";
+import {fetchFolderContents} from "../api/folderApi";
 import type {FolderEntity} from "../types/folder";
+import type {FileEntity} from "../types/file.types.ts";
 
 export function useRightPanel(selectedIdRef: () => string | null) {
   const folders = ref<FolderEntity[]>([]);
+  const files = ref<FileEntity[]>([]);
   const isLoading = ref(false);
   const error = ref<string | null>(null);
 
@@ -11,11 +13,13 @@ export function useRightPanel(selectedIdRef: () => string | null) {
     isLoading.value = true;
     error.value = null;
     try {
-      const res = await fetchFolderChildren(folderId);
-      folders.value = res.data;
+      const res = await fetchFolderContents(folderId);
+      folders.value = res.data.folders;
+      files.value = res.data.files;
     } catch (e: any) {
       error.value = e.message ?? "Failed to load contents";
       folders.value = [];
+      files.value = [];
     } finally {
       isLoading.value = false;
     }
@@ -29,6 +33,7 @@ export function useRightPanel(selectedIdRef: () => string | null) {
         loadContents(newId);
       } else {
         folders.value = [];
+        files.value = [];
       }
     },
     { immediate: true }
@@ -36,6 +41,7 @@ export function useRightPanel(selectedIdRef: () => string | null) {
 
   return {
     folders,
+    files,
     isLoading,
     error,
     reload: () => {
