@@ -12,3 +12,15 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Folder {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String
+  parentId  String?   @db.Uuid
+  parent    Folder?   @relation("FolderChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  children  Folder[]  @relation("FolderChildren")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([parentId], name: "idx_folders_parent_id")
+}
