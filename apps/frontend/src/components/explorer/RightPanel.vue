@@ -46,48 +46,64 @@
 
     <!-- Normal right panel content (when not searching) -->
 
-      <section v-if="content.folders.length > 0" class="right-panel__section">
-        <h3 class="right-panel__section-title">Folders</h3>
-        <div class="right-panel__grid">
-          <div
-              v-for="f in content.folders"
-              :key="f.id"
-              class="right-panel__item"
-          >
-            <Folder class="right-panel__item-icon" :size="18" />
-            <span class="right-panel__item-label">{{ f.name }}</span>
-          </div>
+    <section v-if="content.folders.length > 0" class="right-panel__section">
+      <h3 class="right-panel__section-title">Folders</h3>
+      <div class="right-panel__grid">
+        <div
+            v-for="f in content.folders"
+            :key="f.id"
+            class="right-panel__item"
+            @click="handleFolderClick(f.id)"
+        >
+          <Folder class="right-panel__item-icon" :size="18" />
+          <span class="right-panel__item-label">{{ f.name }}</span>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <section v-if="content.files.length > 0" class="right-panel__section">
-        <h3 class="right-panel__section-title">Files</h3>
-        <ul class="right-panel__files-list">
-          <li
-              v-for="file in content.files"
-              :key="file.id"
-              class="right-panel__file"
-          >
-            <div class="right-panel__file-main">
-              <component
-                  :is="getFileIconByMime(file.mimeType)"
-                  :size="18"
-                  class="right-panel__file-icon"
-              />
-              <span class="right-panel__file-name">{{ file.name }}</span>
-            </div>
-            <span class="right-panel__file-size">
-              {{ formatFileSize(file.sizeBytes) }}
-            </span>
-          </li>
-        </ul>
-      </section>
+    <section v-if="content.files.length > 0" class="right-panel__section">
+      <h3 class="right-panel__section-title">Files</h3>
+      <ul class="right-panel__files-list">
+        <li
+            v-for="file in content.files"
+            :key="file.id"
+            class="right-panel__file"
+            @contextmenu.prevent="onFileRightClick(file, $event)"
+        >
+          <div class="right-panel__file-main">
+            <component
+                :is="getFileIconByMime(file.mimeType)"
+                :size="18"
+                class="right-panel__file-icon"
+            />
+            <span class="right-panel__file-name">{{ file.name }}</span>
+          </div>
+          <span class="right-panel__file-size">
+            {{ formatFileSize(file.sizeBytes) }}
+          </span>
+        </li>
+      </ul>
+    </section>
+
+    <div
+        v-if="showContextMenu && searchActive"
+        class="right-panel__context-menu"
+        :style="{ top: contextMenuY + 'px', left: contextMenuX + 'px' }"
+    >
+      <button
+          type="button"
+          class="right-panel__context-menu-item"
+          @click.stop="handleOpenFolderFromContext"
+      >
+        Open containing folder
+      </button>
+    </div>
 
   </div>
 </template>
 
 <script setup lang="ts">
-import {ref, watch} from "vue";
+import {onBeforeUnmount, onMounted, ref, watch} from "vue";
 import {Folder} from "lucide-vue-next";
 
 import type {FolderContent, FolderEntity} from "../../types/folder";
@@ -106,6 +122,10 @@ const props = defineProps<{
   error: string | null;
 }>();
 
+const emit = defineEmits<{
+  (e: "select-folder", id: string): void;
+}>();
+
 // --- Search state ---
 const searchQuery = ref("");
 const lastQuery = ref("");
@@ -115,6 +135,10 @@ const content = ref<FolderContent>({
   folders: props.folders,
   files: props.files,
 });
+const showContextMenu = ref(false);
+const contextMenuX = ref(0);
+const contextMenuY = ref(0);
+const contextFile = ref<FileEntity | null>(null);
 
 watch(
     () => [props.folders, props.files],
@@ -149,6 +173,51 @@ async function handleSearch() {
     searchLoading.value = false;
   }
 }
+
+function handleFolderClick(id: string) {
+  searchActive.value = false;
+  searchQuery.value = "";
+  emit("select-folder", id);
+}
+
+function onFileRightClick(file: FileEntity, event: MouseEvent) {
+  if (!searchActive.value) return; // only for search results
+
+  event.preventDefault();
+
+  contextFile.value = file;
+  showContextMenu.value = true;
+  contextMenuX.value = event.clientX;
+  contextMenuY.value = event.clientY;
+}
+
+function closeContextMenu() {
+  showContextMenu.value = false;
+  contextFile.value = null;
+}
+
+function handleOpenFolderFromContext() {
+  if (!contextFile.value) return;
+
+  const folderId = contextFile.value.folderId;
+
+  if (!folderId) {
+    closeContextMenu();
+    return;
+  }
+
+  handleFolderClick(folderId);
+
+  closeContextMenu();
+}
+
+onMounted(() => {
+  window.addEventListener("click", closeContextMenu);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("click", closeContextMenu);
+});
 
 </script>
 
@@ -240,4 +309,30 @@ async function handleSearch() {
   font-size: 11px;
   color: #9ca3af;
 }
+
+.right-panel__context-menu {
+  position: fixed;
+  z-index: 50;
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(15, 23, 42, 0.15);
+  padding: 4px 0;
+  min-width: 180px;
+  font-size: 13px;
+}
+
+.right-panel__context-menu-item {
+  width: 100%;
+  padding: 6px 12px;
+  text-align: left;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.right-panel__context-menu-item:hover {
+  background-color: #f3f4f6;
+}
+
 </style>

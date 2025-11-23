@@ -29,7 +29,7 @@
             :files="files"
             :is-loading="contentsLoading"
             :error="contentsError"
-            @select-folder="selectedId = $event"
+            @select-folder="onRightPanelSelect"
         />
       </div>
     </section>
@@ -70,6 +70,14 @@ function onToggle(id: string) {
 
 function onSelect(id: string) {
   select(id);
+}
+
+function onRightPanelSelect(id: string) {
+  select(id);
+
+  if (!expandedIds.value.has(id)) {
+    toggleExpand(id);
+  }
 }
 </script>
 
