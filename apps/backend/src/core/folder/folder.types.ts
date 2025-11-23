@@ -1,7 +1,5 @@
-import type {Folder} from "../../generated/prisma/client.ts";
-import type {FileEntity} from "../file/file.types.ts";
-
-export type FolderEntity = Folder;
+import type { FolderEntity } from "./folder.entity";
+import type { FileEntity } from "../file/file.entity";
 
 export interface FolderNode {
   id: string;
