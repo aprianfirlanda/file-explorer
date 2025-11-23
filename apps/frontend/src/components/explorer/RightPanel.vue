@@ -147,7 +147,6 @@ watch(
         folders: props.folders,
         files: props.files,
       };
-      console.log(content.value);
     }
 );
 
