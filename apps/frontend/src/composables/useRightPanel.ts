@@ -1,9 +1,14 @@
-import {ref, watch} from "vue";
-import {fetchFolderContents} from "../api/folderApiV1.ts";
-import type {FolderEntity} from "../types/folder";
-import type {FileEntity} from "../types/file.types.ts";
+import { ref, watch, type Ref } from "vue";
+import type { FolderEntity } from "../types/folder";
+import type { FileEntity } from "../types/file.types";
+import { fetchFolderContents } from "../api/folderApiV1";
 
-export function useRightPanel(selectedIdRef: () => string | null) {
+type FetchContentsFn = (folderId: string) => Promise<{ data: { folders: FolderEntity[]; files: FileEntity[] } }>;
+
+export function createRightPanel(
+  selectedId: Ref<string | null>,
+  fetchContents: FetchContentsFn
+) {
   const folders = ref<FolderEntity[]>([]);
   const files = ref<FileEntity[]>([]);
   const isLoading = ref(false);
@@ -13,11 +18,12 @@ export function useRightPanel(selectedIdRef: () => string | null) {
     isLoading.value = true;
     error.value = null;
     try {
-      const res = await fetchFolderContents(folderId);
+      const res = await fetchContents(folderId);
       folders.value = res.data.folders;
       files.value = res.data.files;
-    } catch (e: any) {
-      error.value = e.message ?? "Failed to load contents";
+    } catch (e: unknown) {
+      const err = e as { message?: string };
+      error.value = err?.message ?? "Failed to load contents";
       folders.value = [];
       files.value = [];
     } finally {
@@ -25,9 +31,8 @@ export function useRightPanel(selectedIdRef: () => string | null) {
     }
   }
 
-  // autoload when the selected folder changes
   watch(
-    selectedIdRef,
+    selectedId,
     (newId) => {
       if (newId) {
         loadContents(newId);
@@ -39,14 +44,20 @@ export function useRightPanel(selectedIdRef: () => string | null) {
     { immediate: true }
   );
 
+  function reload() {
+    if (selectedId.value) loadContents(selectedId.value);
+  }
+
   return {
     folders,
     files,
     isLoading,
     error,
-    reload: () => {
-      const id = selectedIdRef();
-      if (id) loadContents(id);
-    },
+    reload,
   };
+}
+
+// app usage
+export function useRightPanel(selectedId: Ref<string | null>) {
+  return createRightPanel(selectedId, fetchFolderContents);
 }

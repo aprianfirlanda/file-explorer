@@ -13,7 +13,7 @@
       <div v-if="searchLoading">Searching…</div>
 
       <div v-else>
-        <div v-if="content.folders.length === 0 && content.files.length === 0">
+        <div v-if="!hasSearchResults">
           No results for "<strong>{{ lastQuery }}</strong>"
         </div>
       </div>
@@ -103,16 +103,15 @@
 </template>
 
 <script setup lang="ts">
-import {onBeforeUnmount, onMounted, ref, watch} from "vue";
-import {Folder} from "lucide-vue-next";
-
-import type {FolderContent, FolderEntity} from "../../types/folder";
+import {computed, ref, toRef} from "vue";
+import {Folder} from "../../icons";
+import type {FolderEntity} from "../../types/folder";
 import type {FileEntity} from "../../types/file.types";
 import {getFileIconByMime} from "../../utils/mimeIcon";
 import {formatFileSize} from "../../utils/formatFileSize";
-
 import SearchBar from "./SearchBar.vue";
-import {fetchSearch} from "../../api/searchApiV1.ts";
+import {useSearchContent} from "../../composables/useSearchContent";
+import {useGlobalClickClose} from "../../composables/useGlobalClickClose.ts";
 
 const props = defineProps<{
   selectedId: string | null;
@@ -126,63 +125,37 @@ const emit = defineEmits<{
   (e: "select-folder", id: string): void;
 }>();
 
-// --- Search state ---
-const searchQuery = ref("");
-const lastQuery = ref("");
-const searchActive = ref(false);
-const searchLoading = ref(false);
-const content = ref<FolderContent>({
-  folders: props.folders,
-  files: props.files,
-});
+// use toRef so the composable sees reactive arrays
+const foldersRef = toRef(props, "folders");
+const filesRef = toRef(props, "files");
+
+const {
+  searchQuery,
+  lastQuery,
+  searchActive,
+  searchLoading,
+  content,
+  handleSearch,
+  resetSearch,
+} = useSearchContent(foldersRef, filesRef);
+
+const hasSearchResults = computed(
+    () => content.value.folders.length > 0 || content.value.files.length > 0
+);
+
+// context menu (unchanged)
 const showContextMenu = ref(false);
 const contextMenuX = ref(0);
 const contextMenuY = ref(0);
 const contextFile = ref<FileEntity | null>(null);
 
-watch(
-    () => [props.folders, props.files, searchActive.value],
-    () => {
-      content.value = {
-        folders: props.folders,
-        files: props.files,
-      };
-    }
-);
-
-async function handleSearch() {
-  const q = searchQuery.value.trim();
-
-  if (!q) {
-    searchActive.value = false;
-    content.value = { folders: props.folders, files: props.files };
-    return;
-  }
-
-  searchLoading.value = true;
-  searchActive.value = true;
-  lastQuery.value = q;
-
-  try {
-    const res = await fetchSearch(q);
-    content.value = res.data;
-  } catch (e) {
-    console.error("Search error", e);
-    content.value = { folders: props.folders, files: props.files };
-  } finally {
-    searchLoading.value = false;
-  }
-}
-
 function handleFolderClick(id: string) {
-  searchActive.value = false;
-  searchQuery.value = "";
+  resetSearch();
   emit("select-folder", id);
 }
 
 function onFileRightClick(file: FileEntity, event: MouseEvent) {
-  if (!searchActive.value) return; // only for search results
-
+  if (!searchActive.value) return;
   event.preventDefault();
 
   contextFile.value = file;
@@ -197,28 +170,17 @@ function closeContextMenu() {
 }
 
 function handleOpenFolderFromContext() {
-  if (!contextFile.value) return;
-
-  const folderId = contextFile.value.folderId;
-
-  if (!folderId) {
+  if (!contextFile.value?.folderId) {
     closeContextMenu();
     return;
   }
 
-  handleFolderClick(folderId);
-
+  handleFolderClick(contextFile.value.folderId);
   closeContextMenu();
 }
 
-onMounted(() => {
-  window.addEventListener("click", closeContextMenu);
-});
 
-onBeforeUnmount(() => {
-  window.removeEventListener("click", closeContextMenu);
-});
-
+useGlobalClickClose(closeContextMenu);
 </script>
 
 <style scoped>

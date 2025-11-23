@@ -1,12 +1,12 @@
 <template>
-  <div class="p-2">
-    <div v-if="isLoading">
+  <div class="folder-tree">
+    <div v-if="isLoading" class="folder-tree__state">
       Loading folders...
     </div>
-    <div v-else-if="error">
-      <p class="text-red-600 text-xs">{{ error }}</p>
+    <div v-else-if="error" class="folder-tree__state folder-tree__state--error">
+      <p class="folder-tree__error-text">{{ error }}</p>
     </div>
-    <ul v-else class="space-y-1">
+    <ul v-else class="folder-tree__list">
       <FolderNode
           v-for="node in tree"
           :key="node.id"
@@ -38,3 +38,28 @@ defineEmits<{
   (e: "select", id: string): void;
 }>();
 </script>
+
+<style>
+.folder-tree {
+  padding: 8px;
+}
+
+.folder-tree__state {
+  font-size: 13px;
+  color: #4b5563;
+}
+
+.folder-tree__state--error {
+  color: #b91c1c;
+}
+
+.folder-tree__error-text {
+  font-size: 12px;
+}
+
+.folder-tree__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+</style>

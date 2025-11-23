@@ -51,7 +51,7 @@
 
 <script setup lang="ts">
 import {computed} from "vue";
-import {Folder, FolderOpen, ChevronRight, ChevronDown} from "lucide-vue-next";
+import {Folder, FolderOpen, ChevronRight, ChevronDown} from "../../icons";
 import type {FolderNode as FolderNodeType} from "../../types/folder";
 
 const props = defineProps<{
