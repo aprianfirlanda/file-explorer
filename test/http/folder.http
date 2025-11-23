@@ -3,3 +3,15 @@ GET http://localhost:3000/api/v1/folders/tree
 
 ### GET Folder Contents
 GET http://localhost:3000/api/v1/folders/112738e8-795e-4597-b83c-a00a3650101c/contents
+
+### Add Folder By Parent ID
+POST http://localhost:3000/api/v1/folders
+Content-Type: application/json
+
+{
+  "name": "Job Applications",
+  "parentId": "a7485c33-a8e8-483a-8f1c-634edce68dd0"
+}
+
+### Delete Folder by ID
+DELETE http://localhost:3000/api/v1/folders/055b3a5f-b6b4-469f-a91a-551b8e3d3582
