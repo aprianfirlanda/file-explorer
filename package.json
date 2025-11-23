@@ -1,20 +1,20 @@
 {
   "name": "file-explorer",
   "module": "index.ts",
-  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
   "private": true,
   "scripts": {
     "dev:backend": "bun --filter backend dev",
     "dev:frontend": "bun --filter frontend dev",
     "dev:all": "bun --filter backend dev & bun --filter frontend dev"
   },
+  "type": "module",
   "workspaces": [
     "apps/*"
-  ],
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  }
+  ]
 }

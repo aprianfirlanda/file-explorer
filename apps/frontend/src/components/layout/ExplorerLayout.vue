@@ -64,6 +64,11 @@ import FolderTree from "../explorer/FolderTree.vue";
 import RightPanel from "../explorer/RightPanel.vue";
 import {useFolderTree} from "../../composables/useFolderTree";
 import {useRightPanel} from "../../composables/useRightPanel";
+import {useRoute, useRouter} from "vue-router";
+import {watch} from "vue";
+
+const route = useRoute();
+const router = useRouter();
 
 const {
   tree,
@@ -79,7 +84,6 @@ const {
 
 loadTree();
 
-// for right panel
 const getSelectedId = () => selectedId.value;
 const {
   folders,
@@ -107,6 +111,30 @@ function onRightPanelSelect(id: string) {
 function onBreadcrumbClick(id: string) {
   onRightPanelSelect(id);
 }
+
+function updateUrlFolder(id: string | null) {
+  router.replace({
+    query: {
+      ...route.query,
+      folderId: id ?? undefined,
+    },
+  });
+}
+
+watch(
+    () => route.query.folderId as string | undefined,
+    (folderId) => {
+      if (folderId) {
+        select(folderId);
+      }
+    },
+    { immediate: true }
+);
+
+watch(
+    () => selectedId.value,
+    (id) => updateUrlFolder(id)
+)
 
 </script>
 
