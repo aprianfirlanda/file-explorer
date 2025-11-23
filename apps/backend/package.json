@@ -5,11 +5,11 @@
   "private": true,
   "scripts": {
     "dev": "bun run src/index.ts",
+    "test": "bun test",
     "start": "bun run src/index.ts",
     "prisma:migrate": "bunx prisma migrate dev",
     "prisma:reset": "bunx prisma migrate reset",
     "prisma:generate": "bunx prisma generate",
-    "prisma:studio": "bunx prisma studio",
     "prisma:seed": "bun prisma/seed.ts"
   },
   "devDependencies": {
