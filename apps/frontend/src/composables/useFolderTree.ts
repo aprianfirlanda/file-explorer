@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import {computed, ref} from "vue";
 import type { FolderNode } from "../types/folder";
 import { fetchFolderTree } from "../api/folderApiV1.ts";
 
@@ -37,6 +37,38 @@ export function useFolderTree() {
   const isExpanded = (id: string) => expandedIds.value.has(id);
   const isSelected = (id: string) => selectedId.value === id;
 
+  function findPathToFolder(
+    nodes: FolderNode[],
+    targetId: string
+  ): FolderNode[] | null {
+    for (const node of nodes) {
+      if (node.id === targetId) {
+        return [node];
+      }
+
+      if (node.children && node.children.length > 0) {
+        const childPath = findPathToFolder(node.children, targetId);
+        if (childPath) {
+          return [node, ...childPath];
+        }
+      }
+    }
+    return null;
+  }
+
+  const selectedPath = computed<FolderNode[]>(() => {
+    if (!selectedId.value) return [];
+    const path = findPathToFolder(tree.value, selectedId.value);
+    return path ?? [];
+  });
+
+  const breadcrumbs = computed(() =>
+    selectedPath.value.map((node) => ({
+      id: node.id,
+      name: node.name,
+    }))
+  );
+
   return {
     tree,
     isLoading,
@@ -48,5 +80,6 @@ export function useFolderTree() {
     selectedId,
     select,
     isSelected,
+    breadcrumbs,
   };
 }

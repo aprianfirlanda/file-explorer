@@ -19,8 +19,30 @@
     </section>
 
     <section class="explorer-panel explorer-panel-right">
-      <header class="explorer-panel-header">
+      <header class="explorer-panel-header explorer-panel-header--right">
         <span>Contents</span>
+
+        <nav v-if="breadcrumbs.length" class="breadcrumb">
+          <span
+              v-for="(bc, index) in breadcrumbs"
+              :key="bc.id"
+              class="breadcrumb__item"
+          >
+            <button
+                type="button"
+                class="breadcrumb__link"
+                @click="onBreadcrumbClick(bc.id)"
+            >
+              {{ bc.name }}
+            </button>
+            <span
+                v-if="index < breadcrumbs.length - 1"
+                class="breadcrumb__separator"
+            >
+              /
+            </span>
+          </span>
+        </nav>
       </header>
       <div class="explorer-panel-body">
         <RightPanel
@@ -29,6 +51,7 @@
             :files="files"
             :is-loading="contentsLoading"
             :error="contentsError"
+            :breadcrumbs="breadcrumbs"
             @select-folder="onRightPanelSelect"
         />
       </div>
@@ -41,6 +64,11 @@ import FolderTree from "../explorer/FolderTree.vue";
 import RightPanel from "../explorer/RightPanel.vue";
 import {useFolderTree} from "../../composables/useFolderTree";
 import {useRightPanel} from "../../composables/useRightPanel";
+import {useRoute, useRouter} from "vue-router";
+import {watch} from "vue";
+
+const route = useRoute();
+const router = useRouter();
 
 const {
   tree,
@@ -51,11 +79,11 @@ const {
   toggleExpand,
   selectedId,
   select,
+  breadcrumbs,
 } = useFolderTree();
 
 loadTree();
 
-// for right panel
 const getSelectedId = () => selectedId.value;
 const {
   folders,
@@ -79,6 +107,35 @@ function onRightPanelSelect(id: string) {
     toggleExpand(id);
   }
 }
+
+function onBreadcrumbClick(id: string) {
+  onRightPanelSelect(id);
+}
+
+function updateUrlFolder(id: string | null) {
+  router.replace({
+    query: {
+      ...route.query,
+      folderId: id ?? undefined,
+    },
+  });
+}
+
+watch(
+    () => route.query.folderId as string | undefined,
+    (folderId) => {
+      if (folderId) {
+        select(folderId);
+      }
+    },
+    { immediate: true }
+);
+
+watch(
+    () => selectedId.value,
+    (id) => updateUrlFolder(id)
+)
+
 </script>
 
 
@@ -118,5 +175,47 @@ function onRightPanelSelect(id: string) {
 .explorer-panel-body {
   flex: 1;
   overflow: auto;
+}
+
+.explorer-panel-header--right {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  color: #6b7280;
+  max-width: 70%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.breadcrumb__item {
+  display: inline-flex;
+  align-items: center;
+}
+
+.breadcrumb__link {
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.breadcrumb__link:hover {
+  text-decoration: underline;
+}
+
+.breadcrumb__separator {
+  margin: 0 4px;
+  color: #9ca3af;
 }
 </style>

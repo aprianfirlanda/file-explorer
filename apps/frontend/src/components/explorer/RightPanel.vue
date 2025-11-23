@@ -141,7 +141,7 @@ const contextMenuY = ref(0);
 const contextFile = ref<FileEntity | null>(null);
 
 watch(
-    () => [props.folders, props.files],
+    () => [props.folders, props.files, searchActive.value],
     () => {
       content.value = {
         folders: props.folders,
@@ -262,6 +262,7 @@ onBeforeUnmount(() => {
   border-radius: 6px;
   border: 1px solid #e5e7eb;
   background-color: #f9fafb;
+  cursor: pointer;
 }
 
 .right-panel__item-icon {
@@ -286,6 +287,7 @@ onBeforeUnmount(() => {
   align-items: center;
   padding: 4px 0;
   border-bottom: 1px solid #f3f4f6;
+  cursor: pointer;
 }
 
 .right-panel__file-main {
