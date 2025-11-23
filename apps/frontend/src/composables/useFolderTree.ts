@@ -1,8 +1,12 @@
-import {computed, ref} from "vue";
+import { computed, ref } from "vue";
 import type { FolderNode } from "../types/folder";
-import { fetchFolderTree } from "../api/folderApiV1.ts";
+import { fetchFolderTree } from "../api/folderApiV1";
+import { findPathToFolder } from "../utils/folderTree";
 
-export function useFolderTree() {
+type FetchFolderTreeFn = () => Promise<{ data: FolderNode[] }>;
+
+// factory with DI
+export function createFolderTree(fetchTree: FetchFolderTreeFn) {
   const tree = ref<FolderNode[]>([]);
   const isLoading = ref(false);
   const error = ref<string | null>(null);
@@ -14,10 +18,11 @@ export function useFolderTree() {
     isLoading.value = true;
     error.value = null;
     try {
-      const res = await fetchFolderTree();
+      const res = await fetchTree();
       tree.value = res.data;
-    } catch (e: any) {
-      error.value = e.message ?? "Failed to load folder tree";
+    } catch (e: unknown) {
+      const err = e as { message?: string };
+      error.value = err?.message ?? "Failed to load folder tree";
     } finally {
       isLoading.value = false;
     }
@@ -25,8 +30,7 @@ export function useFolderTree() {
 
   function toggleExpand(id: string) {
     const set = new Set(expandedIds.value);
-    if (set.has(id)) set.delete(id);
-    else set.add(id);
+    set.has(id) ? set.delete(id) : set.add(id);
     expandedIds.value = set;
   }
 
@@ -36,25 +40,6 @@ export function useFolderTree() {
 
   const isExpanded = (id: string) => expandedIds.value.has(id);
   const isSelected = (id: string) => selectedId.value === id;
-
-  function findPathToFolder(
-    nodes: FolderNode[],
-    targetId: string
-  ): FolderNode[] | null {
-    for (const node of nodes) {
-      if (node.id === targetId) {
-        return [node];
-      }
-
-      if (node.children && node.children.length > 0) {
-        const childPath = findPathToFolder(node.children, targetId);
-        if (childPath) {
-          return [node, ...childPath];
-        }
-      }
-    }
-    return null;
-  }
 
   const selectedPath = computed<FolderNode[]>(() => {
     if (!selectedId.value) return [];
@@ -82,4 +67,9 @@ export function useFolderTree() {
     isSelected,
     breadcrumbs,
   };
+}
+
+// app usage (production)
+export function useFolderTree() {
+  return createFolderTree(fetchFolderTree);
 }

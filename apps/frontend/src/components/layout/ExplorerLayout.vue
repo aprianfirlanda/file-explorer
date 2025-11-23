@@ -1,11 +1,15 @@
 <template>
-  <div class="explorer-root">
-    <section class="explorer-panel explorer-panel-left">
-      <header class="explorer-panel-header">
+  <div class="explorer-root" data-test="explorer-root">
+    <section class="explorer-panel explorer-panel-left" data-test="left-panel">
+      <header
+          class="explorer-panel-header"
+          aria-label="Folder Panel Header"
+          data-test="left-panel-header"
+      >
         <span>Folders</span>
       </header>
 
-      <div class="explorer-panel-body">
+      <div class="explorer-panel-body" data-test="left-panel-body">
         <FolderTree
             :tree="tree"
             :is-loading="treeLoading"
@@ -14,37 +18,51 @@
             :selected-id="selectedId"
             @toggle="onToggle"
             @select="onSelect"
+            data-test="folder-tree"
         />
       </div>
     </section>
 
-    <section class="explorer-panel explorer-panel-right">
-      <header class="explorer-panel-header explorer-panel-header--right">
+    <section class="explorer-panel explorer-panel-right" data-test="right-panel">
+      <header
+          class="explorer-panel-header explorer-panel-header--right"
+          aria-label="Contents Panel Header"
+          data-test="right-panel-header"
+      >
         <span>Contents</span>
 
-        <nav v-if="breadcrumbs.length" class="breadcrumb">
+        <nav
+            v-if="breadcrumbs.length"
+            class="breadcrumb"
+            aria-label="Breadcrumb Navigation"
+            data-test="breadcrumb"
+        >
           <span
               v-for="(bc, index) in breadcrumbs"
               :key="bc.id"
               class="breadcrumb__item"
+              data-test="breadcrumb-item"
           >
             <button
                 type="button"
                 class="breadcrumb__link"
+                aria-label="Go to folder in breadcrumb"
+                :data-test="'breadcrumb-link-' + bc.id"
                 @click="onBreadcrumbClick(bc.id)"
             >
               {{ bc.name }}
             </button>
+
             <span
                 v-if="index < breadcrumbs.length - 1"
                 class="breadcrumb__separator"
-            >
-              /
-            </span>
+                aria-hidden="true"
+            >/</span>
           </span>
         </nav>
       </header>
-      <div class="explorer-panel-body">
+
+      <div class="explorer-panel-body" data-test="right-panel-body">
         <RightPanel
             :selected-id="selectedId"
             :folders="folders"
@@ -53,6 +71,7 @@
             :error="contentsError"
             :breadcrumbs="breadcrumbs"
             @select-folder="onRightPanelSelect"
+            data-test="right-panel-component"
         />
       </div>
     </section>
@@ -62,13 +81,9 @@
 <script setup lang="ts">
 import FolderTree from "../explorer/FolderTree.vue";
 import RightPanel from "../explorer/RightPanel.vue";
-import {useFolderTree} from "../../composables/useFolderTree";
-import {useRightPanel} from "../../composables/useRightPanel";
-import {useRoute, useRouter} from "vue-router";
-import {watch} from "vue";
-
-const route = useRoute();
-const router = useRouter();
+import { useFolderTree } from "../../composables/useFolderTree";
+import { useRightPanel } from "../../composables/useRightPanel";
+import { useFolderSelectionSync } from "../../composables/useFolderSelectionSync";
 
 const {
   tree,
@@ -84,13 +99,14 @@ const {
 
 loadTree();
 
-const getSelectedId = () => selectedId.value;
 const {
   folders,
   files,
   isLoading: contentsLoading,
   error: contentsError,
-} = useRightPanel(getSelectedId);
+} = useRightPanel(selectedId);
+
+useFolderSelectionSync(selectedId);
 
 function onToggle(id: string) {
   toggleExpand(id);
@@ -111,33 +127,7 @@ function onRightPanelSelect(id: string) {
 function onBreadcrumbClick(id: string) {
   onRightPanelSelect(id);
 }
-
-function updateUrlFolder(id: string | null) {
-  router.replace({
-    query: {
-      ...route.query,
-      folderId: id ?? undefined,
-    },
-  });
-}
-
-watch(
-    () => route.query.folderId as string | undefined,
-    (folderId) => {
-      if (folderId) {
-        select(folderId);
-      }
-    },
-    { immediate: true }
-);
-
-watch(
-    () => selectedId.value,
-    (id) => updateUrlFolder(id)
-)
-
 </script>
-
 
 <style scoped>
 .explorer-root {

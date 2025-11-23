@@ -1,22 +1,30 @@
 <template>
-  <div class="right-panel__search">
-    <form @submit.prevent="onSubmit">
+  <div class="right-panel__search" data-test="search-bar-root">
+    <form @submit.prevent="onSubmit" aria-label="Search Form" data-test="search-form">
       <input
           :value="modelValue"
           class="right-panel__search-input"
           type="text"
           :placeholder="placeholder"
+          aria-label="Search Input"
+          data-test="search-input"
           @input="onInput"
       />
-      <button type="submit" class="right-panel__search-button">
-        <Search :size="16" />
+
+      <button
+          type="submit"
+          class="right-panel__search-button"
+          aria-label="Execute Search"
+          data-test="search-button"
+      >
+        <Search :size="16" aria-hidden="true" />
       </button>
     </form>
   </div>
 </template>
 
 <script setup lang="ts">
-import {Search} from 'lucide-vue-next'
+import {Search} from '../../icons'
 
 defineProps<{
   modelValue: string

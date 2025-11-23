@@ -1,6 +1,6 @@
 import {
-  File as FileIcon,
-  Image as ImageIcon,
+  FileIcon,
+  ImageIcon,
   FileJson,
   FileText,
   FileCode,
@@ -8,7 +8,7 @@ import {
   FileVideo,
   FileAudio,
   FileArchive,
-} from "lucide-vue-next";
+} from "../icons";
 
 export function getFileIconByMime(mime: string | null) {
   if (!mime) return FileIcon;
