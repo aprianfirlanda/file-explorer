@@ -177,6 +177,7 @@ async function handleSearch() {
 function handleFolderClick(id: string) {
   searchActive.value = false;
   searchQuery.value = "";
+  content.value = { folders: [], files: [] };
   emit("select-folder", id);
 }
 
