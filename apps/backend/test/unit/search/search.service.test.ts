@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeEach } from "bun:test";
-import { SearchService } from "../../../src/core/search/search.service";
-import type { FolderEntity } from "../../../src/core/folder/folder.entity";
-import type { FileEntity } from "../../../src/core/file/file.entity";
-import { InMemoryFolderRepository } from "../folder/inMemoryFolderRepository";
-import { InMemoryFileRepository } from "../folder/inMemoryFileRepository";
+import {beforeEach, describe, expect, it} from "bun:test";
+import {SearchService} from "../../../src/core/search/search.service";
+import type {FolderEntity} from "../../../src/core/folder/folder.entity";
+import type {FileEntity} from "../../../src/core/file/file.entity";
+import {InMemoryFolderRepository} from "../../_doubles/inMemoryFolderRepository.ts";
+import {InMemoryFileRepository} from "../../_doubles/inMemoryFileRepository.ts";
 
 describe("SearchService", () => {
   let folderRepo: InMemoryFolderRepository;

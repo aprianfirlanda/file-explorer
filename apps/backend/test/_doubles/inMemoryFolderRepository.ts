@@ -1,5 +1,5 @@
-import type { FolderRepository } from "../../../src/core/folder/folder.port";
-import type { FolderEntity } from "../../../src/core/folder/folder.entity";
+import type {FolderRepository} from "../../src/core/folder/folder.port";
+import type {FolderEntity} from "../../src/core/folder/folder.entity";
 
 export class InMemoryFolderRepository implements FolderRepository {
   private folders: FolderEntity[] = [];

@@ -1,5 +1,5 @@
-import type { FileRepository } from "../../../src/core/file/file.port";
-import type { FileEntity } from "../../../src/core/file/file.entity";
+import type {FileRepository} from "../../src/core/file/file.port";
+import type {FileEntity} from "../../src/core/file/file.entity";
 
 export class InMemoryFileRepository implements FileRepository {
   private files: FileEntity[] = [];
