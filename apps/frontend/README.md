@@ -25,6 +25,7 @@ A simple and fast frontend application for a file explorer UI, built with:
 
 ## Project Structure (Typical)
 
+```text
 src/
     assets/             # static assets  
     components/         # shared UI components  
@@ -33,6 +34,7 @@ src/
     composables/        # reusable logic  
     styles/             # global styles  
     main.ts             # entrypoint
+```
 
 ---
 
