@@ -1,11 +1,15 @@
 <template>
-  <div class="explorer-root">
-    <section class="explorer-panel explorer-panel-left">
-      <header class="explorer-panel-header">
+  <div class="explorer-root" data-test="explorer-root">
+    <section class="explorer-panel explorer-panel-left" data-test="left-panel">
+      <header
+          class="explorer-panel-header"
+          aria-label="Folder Panel Header"
+          data-test="left-panel-header"
+      >
         <span>Folders</span>
       </header>
 
-      <div class="explorer-panel-body">
+      <div class="explorer-panel-body" data-test="left-panel-body">
         <FolderTree
             :tree="tree"
             :is-loading="treeLoading"
@@ -14,37 +18,51 @@
             :selected-id="selectedId"
             @toggle="onToggle"
             @select="onSelect"
+            data-test="folder-tree"
         />
       </div>
     </section>
 
-    <section class="explorer-panel explorer-panel-right">
-      <header class="explorer-panel-header explorer-panel-header--right">
+    <section class="explorer-panel explorer-panel-right" data-test="right-panel">
+      <header
+          class="explorer-panel-header explorer-panel-header--right"
+          aria-label="Contents Panel Header"
+          data-test="right-panel-header"
+      >
         <span>Contents</span>
 
-        <nav v-if="breadcrumbs.length" class="breadcrumb">
+        <nav
+            v-if="breadcrumbs.length"
+            class="breadcrumb"
+            aria-label="Breadcrumb Navigation"
+            data-test="breadcrumb"
+        >
           <span
               v-for="(bc, index) in breadcrumbs"
               :key="bc.id"
               class="breadcrumb__item"
+              data-test="breadcrumb-item"
           >
             <button
                 type="button"
                 class="breadcrumb__link"
+                aria-label="Go to folder in breadcrumb"
+                :data-test="'breadcrumb-link-' + bc.id"
                 @click="onBreadcrumbClick(bc.id)"
             >
               {{ bc.name }}
             </button>
+
             <span
                 v-if="index < breadcrumbs.length - 1"
                 class="breadcrumb__separator"
-            >
-              /
-            </span>
+                aria-hidden="true"
+            >/</span>
           </span>
         </nav>
       </header>
-      <div class="explorer-panel-body">
+
+      <div class="explorer-panel-body" data-test="right-panel-body">
         <RightPanel
             :selected-id="selectedId"
             :folders="folders"
@@ -53,6 +71,7 @@
             :error="contentsError"
             :breadcrumbs="breadcrumbs"
             @select-folder="onRightPanelSelect"
+            data-test="right-panel-component"
         />
       </div>
     </section>

@@ -1,31 +1,41 @@
 <template>
-  <li style="list-style: none">
+  <li
+      style="list-style: none"
+      role="treeitem"
+      :aria-expanded="hasChildren ? isExpanded : undefined"
+      :aria-selected="isSelected"
+      :data-test="'tree-node-' + node.id"
+  >
     <div
         class="folder-node"
         :class="{ 'folder-node--selected': isSelected }"
         @click.stop="handleSelect"
+        tabindex="0"
+        :data-test="'folder-node-' + node.id"
     >
-      <!-- Toggle arrow -->
       <span
           class="folder-node__toggle"
+          role="button"
+          aria-label="Toggle child folders"
+          tabindex="0"
           @click.stop="handleToggle"
+          :data-test="'folder-node-toggle-' + node.id"
       >
         <span v-if="hasChildren">
-          <ChevronRight v-if="!isExpanded" class="w-4 h-4"/>
-          <ChevronDown v-else class="w-4 h-4"/>
+          <ChevronRight v-if="!isExpanded" class="w-4 h-4" />
+          <ChevronDown v-else class="w-4 h-4" />
         </span>
       </span>
 
-      <!-- Icon -->
       <span class="folder-node__icon">
-        <Folder v-if="!isExpanded" class="w-4 h-4"/>
-        <FolderOpen v-else class="w-4 h-4"/>
+        <Folder v-if="!isExpanded" class="w-4 h-4" />
+        <FolderOpen v-else class="w-4 h-4" />
       </span>
 
-      <!-- Name with indentation -->
       <span
           class="folder-node__label"
           :style="{ paddingLeft: `${level * 12}px` }"
+          data-test="folder-node-label"
       >
         {{ node.name }}
       </span>
@@ -34,6 +44,8 @@
     <ul
         v-if="hasChildren && isExpanded"
         class="folder-node__children"
+        role="group"
+        :data-test="'folder-node-children-' + node.id"
     >
       <FolderNode
           v-for="child in node.children"
