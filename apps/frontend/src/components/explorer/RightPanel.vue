@@ -141,12 +141,13 @@ const contextMenuY = ref(0);
 const contextFile = ref<FileEntity | null>(null);
 
 watch(
-    () => [props.folders, props.files],
+    () => [props.folders, props.files, searchActive.value],
     () => {
       content.value = {
         folders: props.folders,
         files: props.files,
       };
+      console.log(content.value);
     }
 );
 
@@ -177,7 +178,6 @@ async function handleSearch() {
 function handleFolderClick(id: string) {
   searchActive.value = false;
   searchQuery.value = "";
-  content.value = { folders: [], files: [] };
   emit("select-folder", id);
 }
 
