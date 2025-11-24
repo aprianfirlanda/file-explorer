@@ -23,13 +23,8 @@ export function createFolder(payload: {
 }
 
 export async function deleteFolder(folderId: string): Promise<void> {
-  const res = await fetch(`${API_BASE_URL}${API_PREFIX}/${folderId}`, {
+  return request(`${API_BASE_URL}${API_PREFIX}/${folderId}`, {
     method: "DELETE",
     headers: {"Content-Type": "application/json"},
   });
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || `Request failed with ${res.status}`);
-  }
 }
