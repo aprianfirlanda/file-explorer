@@ -11,7 +11,7 @@ async function request<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
     throw new Error(text || `Request failed with ${res.status}`);
   }
 
-  return await res.json() as Promise<T>;
+  return (await res.json()) as T;
 }
 
 export { request };

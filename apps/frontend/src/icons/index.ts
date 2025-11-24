@@ -13,5 +13,6 @@ export {
   FileVideo,
   FileAudio,
   FileArchive,
+  X
 } from "lucide-vue-next";
 

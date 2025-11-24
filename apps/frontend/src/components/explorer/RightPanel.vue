@@ -9,6 +9,21 @@
         data-test="search-bar"
     />
 
+    <div
+        v-if="selectedId"
+        class="right-panel__actions"
+        data-test="right-panel-actions"
+    >
+      <button
+          type="button"
+          class="right-panel__action-button"
+          data-test="btn-add-folder"
+          @click="handleAddFolder"
+      >
+        + Add Folder
+      </button>
+    </div>
+
     <!-- SEARCH MODE -->
     <template v-if="searchActive">
       <h3
@@ -97,6 +112,15 @@
         >
           <Folder class="right-panel__item-icon" :size="18" />
           <span class="right-panel__item-label">{{ f.name }}</span>
+          <button
+              type="button"
+              class="right-panel__item-delete"
+              :data-test="'right-folder-delete-' + f.id"
+              @click.stop="handleDeleteFolder(f.id)"
+              aria-label="Delete this folder"
+          >
+            <X :size="14" aria-hidden="true" />
+          </button>
         </div>
       </div>
     </section>
@@ -158,7 +182,7 @@
 
 <script setup lang="ts">
 import {computed, ref, toRef} from "vue";
-import {Folder} from "../../icons";
+import {Folder, X} from "../../icons";
 import type {FolderEntity} from "../../types/folder";
 import type {FileEntity} from "../../types/file.types";
 import {getFileIconByMime} from "../../utils/mimeIcon";
@@ -177,6 +201,8 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "select-folder", id: string): void;
+  (e: "create-folder", payload: { parentId: string | null; name: string }): void;
+  (e: "delete-folder", id: string): void;
 }>();
 
 // use toRef so the composable sees reactive arrays
@@ -233,8 +259,23 @@ function handleOpenFolderFromContext() {
   closeContextMenu();
 }
 
-
 useGlobalClickClose(closeContextMenu);
+
+function handleAddFolder() {
+  if (!props.selectedId) return;
+
+  const name = window.prompt("Folder name:");
+  if (!name) return;
+
+  emit("create-folder", {
+    parentId: props.selectedId,
+    name: name.trim(),
+  });
+}
+
+function handleDeleteFolder(id: string) {
+  emit("delete-folder", id);
+}
 </script>
 
 <style scoped>
@@ -351,6 +392,64 @@ useGlobalClickClose(closeContextMenu);
 
 .right-panel__context-menu-item:hover {
   background-color: #f3f4f6;
+}
+
+.right-panel__actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.right-panel__action-button {
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #d1d5db;
+  background-color: #f9fafb;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.right-panel__action-button:hover {
+  background-color: #e5e7eb;
+}
+
+.right-panel__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 28px 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+  cursor: pointer;
+}
+
+.right-panel__item-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.right-panel__item-delete {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  border: none;
+  background: transparent;
+  padding: 2px;
+  cursor: pointer;
+  color: #9ca3af;
+  line-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.right-panel__item-delete:hover {
+  color: #b91c1c;
 }
 
 </style>

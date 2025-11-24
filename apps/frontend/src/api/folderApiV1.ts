@@ -1,5 +1,5 @@
 import {API_BASE_URL, request} from "./httpClient.ts";
-import type {FolderContent, FolderNode} from "../types/folder.ts";
+import type {FolderContent, FolderEntity, FolderNode} from "../types/folder.ts";
 import type {ApiResponse} from "../types/api.ts";
 
 const API_PREFIX = "/v1/folders";
@@ -10,4 +10,26 @@ export function fetchFolderTree() {
 
 export function fetchFolderContents(folderId: string) {
   return request<ApiResponse<FolderContent>>(`${API_BASE_URL}${API_PREFIX}/${folderId}/contents`);
+}
+
+export function createFolder(payload: {
+  parentId: string | null;
+  name: string;
+}) {
+  return request<ApiResponse<FolderEntity>>(`${API_BASE_URL}${API_PREFIX}`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteFolder(folderId: string): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}${API_PREFIX}/${folderId}`, {
+    method: "DELETE",
+    headers: {"Content-Type": "application/json"},
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || `Request failed with ${res.status}`);
+  }
 }
