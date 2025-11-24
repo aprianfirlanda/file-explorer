@@ -48,4 +48,36 @@ export class FolderService {
 
     return roots;
   }
+
+  async createFolder(params: { name: string; parentId?: string | null }) {
+    const parentId = params.parentId ?? null;
+
+    if (parentId) {
+      const parent = await this.folderRepo.findById(parentId);
+      if (!parent) {
+        throw new Error("Parent folder not found");
+      }
+    }
+
+    return this.folderRepo.create(params.name, parentId);
+  }
+
+  async deleteFolder(id: string): Promise<void> {
+    const folder = await this.folderRepo.findById(id);
+    if (!folder) {
+      throw new Error("Folder not found");
+    }
+
+    // safety: block delete if has children or files
+    const [children, files] = await Promise.all([
+      this.folderRepo.getByParentId(id),
+      this.fileRepo.getByFolderId(id),
+    ]);
+
+    if (children.length > 0 || files.length > 0) {
+      throw new Error("Folder is not empty");
+    }
+
+    await this.folderRepo.deleteById(id);
+  }
 }

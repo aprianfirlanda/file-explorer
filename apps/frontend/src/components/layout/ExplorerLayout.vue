@@ -72,6 +72,8 @@
             :breadcrumbs="breadcrumbs"
             @select-folder="onRightPanelSelect"
             data-test="right-panel-component"
+            @create-folder="onCreateFolder"
+            @delete-folder="onDeleteFolder"
         />
       </div>
     </section>
@@ -84,6 +86,7 @@ import RightPanel from "../explorer/RightPanel.vue";
 import { useFolderTree } from "../../composables/useFolderTree";
 import { useRightPanel } from "../../composables/useRightPanel";
 import { useFolderSelectionSync } from "../../composables/useFolderSelectionSync";
+import {createFolder, deleteFolder} from "../../api/folderApiV1.ts";
 
 const {
   tree,
@@ -104,6 +107,7 @@ const {
   files,
   isLoading: contentsLoading,
   error: contentsError,
+  reload: reloadContents,
 } = useRightPanel(selectedId);
 
 useFolderSelectionSync(selectedId);
@@ -127,6 +131,35 @@ function onRightPanelSelect(id: string) {
 function onBreadcrumbClick(id: string) {
   onRightPanelSelect(id);
 }
+
+async function onCreateFolder(payload: { parentId: string | null; name: string }) {
+  try {
+    await createFolder(payload);
+    await loadTree();
+    await reloadContents();
+  } catch (e) {
+    console.error("Failed to create folder", e);
+  }
+}
+
+async function onDeleteFolder(id: string) {
+  const ok = window.confirm("Are you sure you want to delete this folder?");
+  if (!ok) return;
+
+  try {
+    await deleteFolder(id);
+    if (selectedId.value === id) {
+      // clear selection if the current folder deleted
+      // @ts-expect-error allow null
+      select(null);
+    }
+    await loadTree();
+    await reloadContents();
+  } catch (e) {
+    console.error("Failed to delete folder", e);
+  }
+}
+
 </script>
 
 <style scoped>
